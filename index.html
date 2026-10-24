@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Play Math with Arya</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Play Math with Arya">
+<style>
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:rgba(0,0,0,0); font-family:"Trebuchet MS",Arial,sans-serif; }
+  #sky { position:absolute; top:0; left:0; right:0; bottom:0; overflow:hidden;
+    background:#8fd8ff; background:-webkit-linear-gradient(top,#5ec4ff,#d8f3ff 70%,#fff6c9);
+    background:linear-gradient(to bottom,#5ec4ff,#d8f3ff 70%,#fff6c9); }
+  .cloud { position:absolute; background:#fff; border-radius:50px; opacity:.9; }
+  .cloud:before,.cloud:after { content:""; position:absolute; background:#fff; border-radius:50%; }
+  #c1 { width:120px; height:36px; top:12%; left:8%; }
+  #c1:before { width:50px; height:50px; top:-24px; left:18px; }
+  #c1:after { width:36px; height:36px; top:-16px; left:62px; }
+  #c2 { width:160px; height:44px; top:38%; right:6%; }
+  #c2:before { width:60px; height:60px; top:-30px; left:24px; }
+  #c2:after { width:44px; height:44px; top:-20px; left:86px; }
+  .balloon { position:absolute; left:0; top:0; width:110px; height:130px;
+    -webkit-transform:translate3d(0,0,0); will-change:transform; }
+  .balloon .body { position:absolute; left:0; top:0; width:110px; height:130px;
+    border-radius:50% 50% 48% 48%; box-shadow:inset -12px -14px 0 rgba(0,0,0,.12), inset 14px 14px 0 rgba(255,255,255,.25); }
+  .balloon .knot { position:absolute; left:50px; top:126px; width:0; height:0;
+    border-left:6px solid transparent; border-right:6px solid transparent; border-top:10px solid rgba(0,0,0,.25); }
+  .balloon .string { position:absolute; left:54px; top:136px; width:2px; height:50px; background:rgba(60,60,60,.5); }
+  .balloon .num { position:absolute; left:0; top:0; width:110px; line-height:120px; text-align:center;
+    font-size:60px; font-weight:bold; color:#fff; text-shadow:0 3px 0 rgba(0,0,0,.25); }
+  .dots { position:absolute; left:0; top:0; width:110px; }
+  .shake { -webkit-animation:shake .4s; animation:shake .4s; }
+  @-webkit-keyframes shake { 0%,100%{margin-left:0} 25%{margin-left:-10px} 75%{margin-left:10px} }
+  @keyframes shake { 0%,100%{margin-left:0} 25%{margin-left:-10px} 75%{margin-left:10px} }
+  .pop { position:absolute; width:14px; height:14px; border-radius:50%; pointer-events:none; }
+  #hud { position:absolute; top:0; left:0; right:0; padding:10px 14px; text-align:center; pointer-events:none; }
+  #ask { display:inline-block; background:rgba(255,255,255,.92); border-radius:40px; padding:8px 28px;
+    font-size:34px; color:#d6336c; font-weight:bold; box-shadow:0 4px 0 rgba(0,0,0,.15); pointer-events:auto; }
+  #stars { position:absolute; top:12px; right:16px; font-size:30px; color:#f59f00; font-weight:bold;
+    background:rgba(255,255,255,.85); border-radius:30px; padding:4px 16px; }
+  #msg { position:absolute; left:0; right:0; top:42%; text-align:center; font-size:64px; font-weight:bold;
+    color:#fff; text-shadow:0 4px 0 rgba(0,0,0,.3); pointer-events:none; opacity:0;
+    -webkit-transition:opacity .3s; transition:opacity .3s; }
+  #start { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(94,196,255,.97); text-align:center; z-index:10; }
+  #start h1 { font-size:46px; line-height:1.1; color:#fff; margin:3% 0 8px; text-shadow:0 4px 0 rgba(0,0,0,.25); }
+  #start p { font-size:26px; color:#fff; margin:0 0 20px; }
+  #play { font-size:48px; font-weight:bold; color:#fff; background:#ff6b6b; border:0; border-radius:60px;
+    padding:20px 70px; box-shadow:0 8px 0 #c92a2a; }
+  #play:active { margin-top:6px; box-shadow:0 2px 0 #c92a2a; }
+  .mode { display:block; width:70%; max-width:420px; margin:0 auto 16px; font-size:32px; font-weight:bold; color:#fff;
+    border:0; border-radius:50px; padding:14px 10px; box-shadow:0 6px 0 rgba(0,0,0,.25); }
+  .mode:active { margin-top:6px; margin-bottom:10px; box-shadow:0 1px 0 rgba(0,0,0,.25); }
+  #home { position:absolute; left:14px; top:62px; font-size:26px; background:rgba(255,255,255,.85);
+    border-radius:30px; padding:4px 14px; }
+  #sound { position:absolute; left:14px; top:12px; font-size:30px; background:rgba(255,255,255,.85);
+    border-radius:30px; padding:4px 14px; }
+</style>
+</head>
+<body>
+<div id="sky">
+  <div class="cloud" id="c1"></div>
+  <div class="cloud" id="c2"></div>
+</div>
+<div id="hud"><div id="ask">Pop number 1!</div></div>
+<div id="home">&#127968; Menu</div>
+<div id="sound">&#128266;</div>
+<div id="stars">&#11088; 0</div>
+<div id="msg"></div>
+<div id="start">
+  <h1>&#127880; Play Math<br>with Arya! &#127880;</h1>
+  <p id="hello">Pick a game:</p>
+  <button class="mode" data-mode="count" style="background:#ff6b6b">&#128290; Numbers 1-10</button>
+  <button class="mode" data-mode="add" style="background:#51cf66">&#10133; Plus (up to 10)</button>
+  <button class="mode" data-mode="sub" style="background:#339af0">&#10134; Minus (up to 10)</button>
+  <button class="mode" data-mode="add20" style="background:#cc5de8">&#10133; Plus (up to 20)</button>
+  <button class="mode" data-mode="mix" style="background:#ff922b">&#127775; Plus &amp; Minus mix</button>
+</div>
+
+<script>
+(function () {
+  var sky = document.getElementById('sky');
+  var ask = document.getElementById('ask');
+  var starsEl = document.getElementById('stars');
+  var msgEl = document.getElementById('msg');
+  var startEl = document.getElementById('start');
+  var soundBtn = document.getElementById('sound');
+
+  // Name from the link:  index.html?name=Ayesha
+  var name = '';
+  try {
+    var m = /[?&]name=([^&]+)/.exec(window.location.search);
+    if (m) { name = decodeURIComponent(m[1].replace(/\+/g, ' ')); }
+  } catch (e) {}
+  if (name) { document.getElementById('hello').innerHTML = 'Hi ' + name + '! Pick a game:'; }
+
+  var COLORS = ['#ff6b6b', '#ffa94d', '#ffd43b', '#51cf66', '#339af0', '#cc5de8', '#f783ac'];
+  var PRAISE = ['Great job!', 'Yay!', 'Awesome!', 'Super!', 'Well done!', 'Wow!', 'Hooray!'];
+  var MAX_NUM = 10;
+  var balloons = [];
+  var target = 1;
+  var stars = 0;
+  var soundOn = true;
+  var running = false;
+  var lastTime = 0;
+  var spawnTimer = 0;
+  var W = window.innerWidth, H = window.innerHeight;
+
+  window.onresize = function () { W = window.innerWidth; H = window.innerHeight; };
+
+  // ---------- Sound ----------
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var actx = null;
+  function initAudio() {
+    if (!actx && AC) { try { actx = new AC(); } catch (e) { actx = null; } }
+    if (actx && actx.resume) { try { actx.resume(); } catch (e) {} }
+  }
+  function tone(freq, start, dur, type, vol) {
+    if (!actx || !soundOn) { return; }
+    var o = actx.createOscillator();
+    var g = actx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    var t = actx.currentTime + start;
+    g.gain.setValueAtTime(vol || 0.25, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  function popSound() {
+    tone(700, 0, 0.08, 'square', 0.25);
+    tone(350, 0.03, 0.12, 'square', 0.2);
+    tone(900, 0.06, 0.1, 'sine', 0.2);
+  }
+  function winSound() { tone(523, 0, 0.12); tone(659, 0.12, 0.12); tone(784, 0.24, 0.2); }
+  function oopsSound() { tone(300, 0, 0.18, 'triangle', 0.2); }
+
+  function say(text) {
+    if (!soundOn) { return; }
+    try {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.85; u.pitch = 1.3; u.lang = 'en-US';
+        window.speechSynthesis.speak(u);
+      }
+    } catch (e) {}
+  }
+
+  // ---------- Game ----------
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  var mode = 'count';
+  var speakText = '';
+  var loopId = 0;
+
+  function ri(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+  function maxAnswer() { return (mode === 'add20' || mode === 'mix') ? 20 : 10; }
+
+  // makes a new question; sets target (the right answer) and the banner text
+  function newQuestion() {
+    var old = target;
+    if (mode === 'count') {
+      target = (target % MAX_NUM) + 1;
+      ask.innerHTML = 'Pop number ' + target + '!';
+      speakText = 'Pop number ' + target;
+      return;
+    }
+    var kind = mode;
+    if (mode === 'mix') { kind = (Math.random() < 0.5) ? 'add' : 'sub'; }
+    var a, b, ans, sign, word;
+    var tries = 0;
+    do {
+      if (kind === 'sub') {
+        a = ri(1, 10); b = ri(0, a); ans = a - b; sign = '&minus;'; word = 'minus';
+      } else {
+        var lim = maxAnswer();
+        a = ri(0, lim); b = ri(0, lim - a); ans = a + b; sign = '+'; word = 'plus';
+      }
+      tries++;
+    } while (ans === old && tries < 10);
+    target = ans;
+    ask.innerHTML = a + ' ' + sign + ' ' + b + ' = ?';
+    speakText = a + ' ' + word + ' ' + b;
+  }
+
+  function setTarget(n) {
+    target = n;
+    ask.innerHTML = 'Pop number ' + n + '!';
+  }
+
+  function randomNum() {
+    if (mode === 'count') { return 1 + Math.floor(Math.random() * MAX_NUM); }
+    var n, t = 0;
+    do { n = ri(0, maxAnswer()); t++; } while (n === target && t < 10);
+    return n;
+  }
+
+  function makeBalloon(forceNum) {
+    var num = (forceNum !== undefined && forceNum !== null && forceNum !== -1) ? forceNum : randomNum();
+    var size = rand(0.9, 1.25);
+    var color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    var el = document.createElement('div');
+    el.className = 'balloon';
+    el.innerHTML = '<div class="body" style="background:' + color + '"></div>' +
+      '<div class="knot" style="border-top-color:' + color + '"></div>' +
+      '<div class="string"></div><div class="num">' + num + '</div>';
+    var x = rand(10, Math.max(20, W - 130 * size));
+    var b = { el: el, num: num, x: x, y: H + 40, speed: rand(55, 95), size: size,
+              sway: rand(0, 6.28), swayAmp: rand(6, 18), dead: false };
+    var pop = function (ev) {
+      if (ev && ev.preventDefault) { ev.preventDefault(); }
+      hit(b);
+    };
+    el.addEventListener('touchstart', pop, false);
+    el.addEventListener('mousedown', pop, false);
+    sky.appendChild(el);
+    balloons.push(b);
+    return b;
+  }
+
+  function burst(x, y, color) {
+    for (var i = 0; i < 10; i++) {
+      var p = document.createElement('div');
+      p.className = 'pop';
+      p.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+      p.style.left = x + 'px'; p.style.top = y + 'px';
+      sky.appendChild(p);
+      var ang = (i / 10) * 6.28, dist = rand(50, 110);
+      (function (p, ang, dist) {
+        setTimeout(function () {
+          p.style.webkitTransition = p.style.transition = 'all .5s ease-out';
+          var t = 'translate(' + Math.cos(ang) * dist + 'px,' + Math.sin(ang) * dist + 'px)';
+          p.style.webkitTransform = p.style.transform = t;
+          p.style.opacity = '0';
+        }, 10);
+        setTimeout(function () { if (p.parentNode) { p.parentNode.removeChild(p); } }, 600);
+      })(p, ang, dist);
+    }
+  }
+
+  function showMsg(text) {
+    msgEl.innerHTML = text;
+    msgEl.style.opacity = '1';
+    setTimeout(function () { msgEl.style.opacity = '0'; }, 900);
+  }
+
+  function removeBalloon(b) {
+    b.dead = true;
+    if (b.el.parentNode) { b.el.parentNode.removeChild(b.el); }
+  }
+
+  function hit(b) {
+    if (b.dead || !running) { return; }
+    if (b.num === target) {
+      var cx = b.x + 55 * b.size, cy = b.y + 65 * b.size;
+      burst(cx, cy);
+      removeBalloon(b);
+      popSound();
+      stars += 1;
+      starsEl.innerHTML = '&#11088; ' + stars;
+      var p = PRAISE[Math.floor(Math.random() * PRAISE.length)];
+      showMsg(p);
+      winSound();
+      newQuestion();
+      say(p + ' ' + (mode === 'count' ? '' : 'Next. ') + speakText);
+      ensureTargetExists();
+    } else {
+      oopsSound();
+      b.el.className = 'balloon shake';
+      setTimeout(function () { b.el.className = 'balloon'; }, 450);
+      if (mode === 'count') { say('That is ' + b.num + '. Find ' + target); } else { say('Oops. Try again'); }
+    }
+  }
+
+  function ensureTargetExists() {
+    for (var i = 0; i < balloons.length; i++) {
+      if (!balloons[i].dead && balloons[i].num === target) { return; }
+    }
+    makeBalloon(target);
+  }
+
+  function frame(now, myLoop) {
+    if (!running || myLoop !== loopId) { return; }
+    now = Date.now();
+    var dt = (now - lastTime) / 1000;
+    if (!(dt > 0)) { dt = 0.016; }
+    if (dt > 0.05) { dt = 0.05; }
+    lastTime = now;
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) {
+      spawnTimer = rand(0.9, 1.6);
+      // about 1 in 3 balloons is the number to find
+      makeBalloon(Math.random() < 0.35 ? target : -1);
+    }
+    var alive = [];
+    for (var i = 0; i < balloons.length; i++) {
+      var b = balloons[i];
+      if (b.dead) { continue; }
+      b.y -= b.speed * dt;
+      b.sway += dt * 1.5;
+      var sx = b.x + Math.sin(b.sway) * b.swayAmp;
+      b.el.style.webkitTransform = b.el.style.transform =
+        'translate3d(' + sx + 'px,' + b.y + 'px,0) scale(' + b.size + ')';
+      if (b.y < -220) { removeBalloon(b); }
+      else { alive.push(b); }
+    }
+    balloons = alive;
+    ensureTargetExists();
+    requestAnimationFrame(function (t) { frame(t, myLoop); });
+  }
+
+  var raf = window.requestAnimationFrame || window.webkitRequestAnimationFrame ||
+    function (cb) { return setTimeout(function () { cb(Date.now()); }, 16); };
+  window.requestAnimationFrame = raf;
+
+  function clearBalloons() {
+    for (var i = 0; i < balloons.length; i++) { removeBalloon(balloons[i]); }
+    balloons = [];
+  }
+
+  function startGame(m) {
+    initAudio();
+    mode = m;
+    clearBalloons();
+    startEl.style.display = 'none';
+    running = true;
+    loopId++;
+    stars = 0;
+    starsEl.innerHTML = '&#11088; 0';
+    target = 0;
+    newQuestion();
+    for (var i = 0; i < 4; i++) {
+      var b = makeBalloon(i === 0 ? target : -1);
+      b.y = H - 140 - i * 120;
+      b.x = (W / 5) * (i + 0.5);
+    }
+    say((name ? 'Hi ' + name + '! ' : '') + speakText);
+    lastTime = Date.now();
+    var myLoop = loopId;
+    requestAnimationFrame(function (t) { frame(t, myLoop); });
+  }
+
+  function showMenu(e) {
+    if (e && e.preventDefault) { e.preventDefault(); }
+    running = false;
+    loopId++;
+    clearBalloons();
+    if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+    startEl.style.display = 'block';
+  }
+
+  var modeBtns = document.querySelectorAll('.mode');
+  for (var mi = 0; mi < modeBtns.length; mi++) {
+    (function (btn) {
+      var go = function (e) { if (e && e.preventDefault) { e.preventDefault(); } startGame(btn.getAttribute('data-mode')); };
+      btn.addEventListener('touchend', go, false);
+      btn.addEventListener('click', go, false);
+    })(modeBtns[mi]);
+  }
+  var homeBtn = document.getElementById('home');
+  homeBtn.addEventListener('touchend', showMenu, false);
+  homeBtn.addEventListener('click', showMenu, false);
+
+  function toggleSound(e) {
+    if (e && e.preventDefault) { e.preventDefault(); }
+    soundOn = !soundOn;
+    soundBtn.innerHTML = soundOn ? '&#128266;' : '&#128263;';
+    if (!soundOn && window.speechSynthesis) { window.speechSynthesis.cancel(); }
+  }
+  soundBtn.addEventListener('touchend', toggleSound, false);
+  soundBtn.addEventListener('click', toggleSound, false);
+
+  // tap the question to hear it again
+  ask.addEventListener('touchend', function (e) { e.preventDefault(); say(speakText); }, false);
+
+  // stop page from scrolling/bouncing on iPad
+  document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+})();
+</script>
+</body>
+</html>
